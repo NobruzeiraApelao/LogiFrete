@@ -1,0 +1,150 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #1e293b;
+    padding: 28px 5%;
+    border-bottom: 3px solid #38bdf8;
+}
+
+header h1 {
+    margin: 0;
+    color: #38bdf8;
+    font-size: 30px;
+}
+
+header p {
+    margin-bottom: 0;
+}
+
+main {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 24px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.painel {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 16px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    min-width: 150px;
+    padding: 11px;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #475569;
+    border-radius: 6px;
+}
+
+form button,
+button,
+.botao {
+    background: #0284c7;
+    color: white;
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+form button:hover,
+button:hover,
+.botao:hover {
+    background: #0369a1;
+}
+
+.tabela {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+th,
+td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #334155;
+}
+
+th {
+    color: #38bdf8;
+}
+
+a {
+    color: #38bdf8;
+}
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #111111 !important;
+    }
+
+    header {
+        background: #ffffff !important;
+        color: #111111 !important;
+        border-bottom: 2px solid #0284c7;
+    }
+
+    header h1,
+    h2,
+    th,
+    td,
+    p,
+    label {
+        color: #111111 !important;
+    }
+
+    .painel {
+        background: #ffffff !important;
+        color: #111111 !important;
+        border: 1px solid #cccccc;
+    }
+
+    input,
+    select {
+        color: #111111 !important;
+        background: #ffffff !important;
+    }
+
+    button,
+    a {
+        color: #111111 !important;
+    }
+}
