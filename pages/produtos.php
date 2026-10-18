@@ -3,20 +3,43 @@
 require_once __DIR__ . '/../includes/db.php';
 
 $mensagem = '';
+$produtoEdicao = null;
 
+// Salvar um novo produto ou atualizar um existente
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $descricao = trim($_POST['descricao'] ?? '');
     $peso = (float) ($_POST['peso'] ?? 0);
+    $id = (int) ($_POST['id'] ?? 0);
 
-    if ($nome !== '') {
+    if ($nome === '') {
+        $mensagem = 'Informe o nome do produto.';
+    } elseif ($peso < 0) {
+        $mensagem = 'O peso não pode ser negativo.';
+    } elseif ($id > 0) {
+        $stmt = $pdo->prepare(
+            'UPDATE produtos SET nome = ?, descricao = ?, peso = ? WHERE id = ?'
+        );
+        $stmt->execute([$nome, $descricao, $peso, $id]);
+        $mensagem = 'Produto atualizado com sucesso!';
+    } else {
         $stmt = $pdo->prepare(
             'INSERT INTO produtos (nome, descricao, peso) VALUES (?, ?, ?)'
         );
         $stmt->execute([$nome, $descricao, $peso]);
         $mensagem = 'Produto cadastrado com sucesso!';
-    } else {
-        $mensagem = 'Informe o nome do produto.';
+    }
+}
+
+// Buscar produto selecionado para edição
+if (isset($_GET['editar'])) {
+    $idEdicao = (int) $_GET['editar'];
+    $stmt = $pdo->prepare('SELECT * FROM produtos WHERE id = ?');
+    $stmt->execute([$idEdicao]);
+    $produtoEdicao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$produtoEdicao) {
+        $mensagem = 'Produto não encontrado.';
     }
 }
 
@@ -61,7 +84,7 @@ $produtos = $pdo->query(
             background: #0f172a;
             color: white;
         }
-        button, .voltar {
+        button, .voltar, .editar, .cancelar {
             display: inline-block;
             margin-top: 18px;
             padding: 12px 18px;
@@ -72,9 +95,14 @@ $produtos = $pdo->query(
             cursor: pointer;
             text-decoration: none;
         }
+        .cancelar { background: #475569; }
         .mensagem { color: #7dd3fc; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
         .tabela { overflow-x: auto; }
     </style>
 </head>
@@ -88,23 +116,34 @@ $produtos = $pdo->query(
     <a class="voltar" href="../index.php">← Voltar ao painel</a>
 
     <section class="painel">
-        <h2>Novo produto</h2>
+        <h2><?= $produtoEdicao ? 'Editar produto' : 'Novo produto' ?></h2>
 
         <?php if ($mensagem !== ''): ?>
             <p class="mensagem"><?= htmlspecialchars($mensagem) ?></p>
         <?php endif; ?>
 
         <form method="post">
+            <input type="hidden" name="id"
+                   value="<?= (int) ($produtoEdicao['id'] ?? 0) ?>">
+
             <label for="nome">Nome do produto *</label>
-            <input id="nome" name="nome" required maxlength="150">
+            <input id="nome" name="nome" required maxlength="150"
+                   value="<?= htmlspecialchars($produtoEdicao['nome'] ?? '') ?>">
 
             <label for="descricao">Descrição</label>
-            <textarea id="descricao" name="descricao" rows="3"></textarea>
+            <textarea id="descricao" name="descricao" rows="3"><?= htmlspecialchars($produtoEdicao['descricao'] ?? '') ?></textarea>
 
             <label for="peso">Peso (kg)</label>
-            <input id="peso" name="peso" type="number" min="0" step="0.01" value="0">
+            <input id="peso" name="peso" type="number" min="0" step="0.01"
+                   value="<?= htmlspecialchars((string) ($produtoEdicao['peso'] ?? '0')) ?>">
 
-            <button type="submit">Salvar produto</button>
+            <button type="submit">
+                <?= $produtoEdicao ? 'Atualizar produto' : 'Salvar produto' ?>
+            </button>
+
+            <?php if ($produtoEdicao): ?>
+                <a class="cancelar" href="produtos.php">Cancelar edição</a>
+            <?php endif; ?>
         </form>
     </section>
 
@@ -118,6 +157,7 @@ $produtos = $pdo->query(
                         <th>Nome</th>
                         <th>Descrição</th>
                         <th>Peso (kg)</th>
+                        <th>Ação</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -127,6 +167,12 @@ $produtos = $pdo->query(
                         <td><?= htmlspecialchars($produto['nome']) ?></td>
                         <td><?= htmlspecialchars($produto['descricao'] ?? '') ?></td>
                         <td><?= htmlspecialchars((string) $produto['peso']) ?></td>
+                        <td>
+                            <a class="editar"
+                               href="produtos.php?editar=<?= (int) $produto['id'] ?>">
+                                Editar
+                            </a>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
